@@ -1,33 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-    <title>Projektuppgift Grupp 3</title>
+    <title>Min filmdagbok</title>
   </head>
   <body>
-    <h1>Projektuppgift Grupp 3</h1>
+    <main>
+      <h1>Min filmdagbok</h1>
 
-    <div class="container">
-      <!-- Input 1 färg -->
-      <label for="color">Färg:</label>
-      <input type="text" name="color" id="color" class="textfield" />
+      <div class="container">
+        <!-- Input 1 färg -->
+        <label for="color">Titel:</label>
+        <input type="text" name="color" id="color" class="textfield" /><br />
 
-      <!-- Input 2 innehåll -->
-      <label for="content">Innehåll:</label>
-      <input type="text" name="content" id="content" class="textfield" />
+        <!-- Input 2 innehåll -->
+        <label for="content">Betyg:</label>
+        <input
+          type="text"
+          name="content"
+          id="content"
+          class="textfield"
+        /><br />
 
-      <!-- Input 3: använd stil-->
-      <label for="divStyle">Använd stil:</label>
-      <input type="checkbox" name="divStyle" id="divStyle" class="checkbox" />
+        <!-- Input 3: använd stil-->
+        <label for="divStyle">Beskrivning:</label>
+        <input
+          type="text"
+          name="divStyle"
+          id="divStyle"
+          class="textfield"
+        /><br />
 
-      <!-- Knapp -->
-      <button id="button">Ta bort div</button>
+        <!-- Knapp -->
+        <button id="button">Uppdatera</button>
 
-      <!-- Resultat container -->
-      <div id="resultContainer"></div>
-    </div>
-    <script src="script.js"></script>
+        <!-- Resultat container -->
+        <div id="resultContainer"></div>
+      </div>
+      <div class="main-container">
+        <div class="box">
+          <img
+            src="https://mz-prod.s3.amazonaws.com/uploads/photo/file/64157/medium_original.jpg"
+            alt="Bild på Nyckeln till frihet"
+          />
+          <h3>Filminfo</h3>
+          <p>Här kommer texten</p>
+          <button>Ta bort</button>
+          <button>Uppdatera</button>
+        </div>
+        <div class="box">
+          <img
+            src="https://mz-prod.s3.amazonaws.com/uploads/photo/file/64157/medium_original.jpg"
+            alt="Bild på Nyckeln till frihet"
+          />
+          <h3>Filminfo</h3>
+          <p>Här kommer texten</p>
+          <button>Ta bort</button>
+          <button>Uppdatera</button>
+        </div>
+        <div class="box">
+          <img
+            src="https://mz-prod.s3.amazonaws.com/uploads/photo/file/64157/medium_original.jpg"
+            alt="Bild på Nyckeln till frihet"
+          />
+          <h3>Filminfo</h3>
+          <p>Här kommer texten</p>
+          <button>Ta bort</button>
+          <button>Uppdatera</button>
+        </div>
+        <div class="box">
+          <img
+            src="https://mz-prod.s3.amazonaws.com/uploads/photo/file/64157/medium_original.jpg"
+            alt="Bild på Nyckeln till frihet"
+          />
+          <h3>Filminfo</h3>
+          <p>Här kommer texten</p>
+          <button>Ta bort</button>
+          <button>Uppdatera</button>
+        </div>
+      </div>
+      <script src="script.js"></script>
+    </main>
   </body>
 </html>
