@@ -36,7 +36,7 @@ function renderMovies(movies) {
         movieCard.innerHTML = `
             <h3 class="text-xl font-bold text-slate-800 mb-1">${movie.title}</h3>
             <p class="text-sm font-semibold text-slate-500 mb-3 italic">Betyg: ${movie.rating}/5</p>
-            <p class="text-slate-600 mb-6">${movie.description}</p>
+            <p class="text-slate-600 mb-6">${movie.reviewText}</p>
             <div class="flex gap-3">
                 <button onclick="prepareUpdate(${movie.id})" class="text-sm bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-200 transition">Ändra</button>
                 <button onclick="deleteMovie(${movie.id})" class="text-sm bg-red-100 text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-200 transition">Ta bort</button>
@@ -53,7 +53,7 @@ movieForm.addEventListener('submit', async (e) => {
     const movieData = {
         title: document.getElementById('title').value,
         rating: parseInt(document.getElementById('rating').value),
-        description: document.getElementById('description').value
+        reviewText: document.getElementById('description').value
     };
 
     const id = movieIdInput.value;
@@ -63,6 +63,7 @@ movieForm.addEventListener('submit', async (e) => {
     // Om det finns ett ID i det dolda fältet, välj PUT (uppdatera) 
     if (id) {
         method = 'PUT';
+        url = `${API_URL}/${id}`; //Lägg till ID i URL:en för PUT
         movieData.id = id; 
     }
 
