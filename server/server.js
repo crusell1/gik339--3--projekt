@@ -1,6 +1,19 @@
+const PORT = process.env.PORT || 3000;
+
+const express = require("express"); //imorterar express
+const server = express(); //startar servern
+
+server.use(express.json());
+server.listen(3000, () => {
+  console.log("Server is running on http://localhost:3000");
+});
+
+const cors = require("cors");
+server.use(cors());
+
 const sqlite3 = require("sqlite3").verbose();
 
-const db = new sqlite3.Database("movies.db");
+const db = new sqlite3.Database(__dirname, "movies.db");
 
 db.run(`
   CREATE TABLE IF NOT EXISTS movies (
@@ -32,16 +45,6 @@ db.get("SELECT COUNT(*) AS count FROM movies", [], (error, row) => {
     const sql =
       "INSERT INTO movies (title, rating, reviewText) VALUES (?, ?, ?)";
   }
-});
-
-const PORT = process.env.PORT || 3000;
-
-const express = require("express"); //imorterar express
-const server = express(); //startar servern
-
-server.use(express.json());
-server.listen(3000, () => {
-  console.log("Server is running on http://localhost:3000");
 });
 
 server.get("/movies", (req, res) => {
