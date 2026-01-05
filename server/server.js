@@ -1,11 +1,40 @@
+const sqlite3 = require("sqlite3").verbose();
+
+const db = new sqlite3.Database("movies.db");
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS movies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    rating INTEGER NOT NULL,
+    reviewText TEXT NOT NULL
+  )
+`);
+
+db.get("SELECT COUNT(*) AS count FROM movies", [], (error, row) => {
+  if (error) {
+    console.log("Fel vid kontroll av databasen:", error.message);
+    return;
+  }
+
+  // Om tabellen är tom – lägg in startfilmer
+  if (row.count === 0) {
+    const startMovies = [
+      [
+        "The Dark Knight",
+        10,
+        "En av de bästa filmerna någonsin. Joker är ikonisk.",
+      ],
+      ["Interstellar", 9, "Stark sci-fi om tid, rymd och relationer."],
+      ["Spirited Away", 8, "Magisk, kreativ och visuellt fantastisk."],
+    ];
+
+    const sql =
+      "INSERT INTO movies (title, rating, reviewText) VALUES (?, ?, ?)";
+  }
+});
+
 const PORT = process.env.PORT || 3000;
-
-const movies = [];
-
-function nextId() {
-  const n = movies.length + 1;
-  return String(n).padStart(3, "0");
-}
 
 const express = require("express"); //imorterar express
 const server = express(); //startar servern
@@ -16,60 +45,106 @@ server.listen(3000, () => {
 });
 
 server.get("/movies", (req, res) => {
-  res.status(200).json(movies); //returnerar listan
+  db.all("SELECT * FROM movies", [], (error, rows) => {
+    if (error) {
+      return res
+        .status(500)
+        .json({ message: "Serverfel vid hämtning av filmer" });
+    }
+
+    res.status(200).json(rows); //returnerar listan
+  });
 });
 
 server.post("/movies", (req, res) => {
   const { title, rating, reviewText } = req.body;
-  const id = nextId();
-  const newMovie = {
-    id: id,
-    title: title,
-    rating: rating,
-    reviewText: reviewText,
-  };
 
-  movies.push(newMovie); // sparar i arrayen
-  res.status(201).json(newMovie);
+  db.run(
+    "INSERT INTO movies (title, rating, reviewText) VALUES (?, ?, ?)",
+    [title, rating, reviewText],
+    function (error) {
+      if (error) {
+        return res
+          .status(500)
+          .json({ message: "Serverfel vid skapande av film" });
+      }
+
+      res.status(201).json({
+        id: this.lastID,
+        title,
+        rating,
+        reviewText,
+      });
+    }
+  );
 });
 
 server.get("/movies/:id", (req, res) => {
   const id = req.params.id;
-  const movie = movies.find((t) => t.id === id);
 
-  if (!movie) {
-    return res.sendStatus(404);
-  }
+  db.get("SELECT * FROM movies WHERE id = ?", [id], (error, row) => {
+    if (error) {
+      return res
+        .status(500)
+        .json({ message: "Serverfel vid hämtning av film" });
+    }
 
-  res.status(200).json(movie);
+    if (!row) {
+      return res.sendStatus(404);
+    }
+
+    res.status(200).json(row);
+  });
 });
 
 server.put("/movies/:id", (req, res) => {
   const id = req.params.id;
   const { title, rating, reviewText } = req.body;
 
-  const movie = movies.find((m) => m.id === id);
+  db.run(
+    "UPDATE movies SET title = ?, rating = ?, reviewText = ? WHERE id = ?",
+    [title, rating, reviewText, id],
+    function (error) {
+      if (error) {
+        return res
+          .status(500)
+          .json({ message: "Serverfel vid uppdatering av film" });
+      }
 
-  if (!movie) {
-    return res.sendStatus(404);
-  }
+      // Om inget uppdaterades => id fanns inte
+      if (this.changes === 0) {
+        return res.sendStatus(404);
+      }
 
-  movie.title = title ?? movie.title;
-  movie.rating = rating ?? movie.rating;
-  movie.reviewText = reviewText ?? movie.reviewText;
-
-  res.json(movie);
+      // Hämta uppdaterad rad och skicka tillbaka
+      db.get("SELECT * FROM movies WHERE id = ?", [id], (error2, row) => {
+        if (error2) {
+          return res
+            .status(500)
+            .json({ message: "Serverfel vid hämtning av uppdaterad film" });
+        }
+        res.status(200).json(row);
+      });
+    }
+  );
 });
 
 server.delete("/movies/:id", (req, res) => {
   const id = req.params.id;
 
-  const index = movies.findIndex((m) => m.id === id);
+  db.run("DELETE FROM movies WHERE id = ?", [id], function (error) {
+    if (error) {
+      return res
+        .status(500)
+        .json({ message: "Serverfel vid borttagning av film" });
+    }
 
-  if (index === -1) {
-    return res.sendStatus(404);
-  }
+    // Om inget togs bort => id fanns inte
+    if (this.changes === 0) {
+      return res.sendStatus(404);
+    }
 
-  movies.splice(index, 1);
-  res.status(204).json(movies);
+    // 204 = lyckad borttagning, inget innehåll tillbaka
+    res.sendStatus(204);
+  });
 });
