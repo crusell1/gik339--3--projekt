@@ -53,7 +53,7 @@ movieForm.addEventListener('submit', async (e) => {
     const movieData = {
         title: document.getElementById('title').value,
         rating: parseInt(document.getElementById('rating').value),
-        reviewText: document.getElementById('description').value
+        reviewText: document.getElementById('reviewText').value
     };
 
     const id = movieIdInput.value;
@@ -111,7 +111,7 @@ async function prepareUpdate(id) {
         // Fyll formuläret med befintlig data 
         document.getElementById('title').value = movie.title;
         document.getElementById('rating').value = movie.rating;
-        document.getElementById('description').value = movie.description;
+        document.getElementById('reviewText').value = movie.reviewText;
         movieIdInput.value = movie.id; // Spara ID osynligt 
 
         submitBtn.textContent = 'Uppdatera film';
