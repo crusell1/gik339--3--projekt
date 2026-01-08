@@ -33,11 +33,11 @@ db.get("SELECT COUNT(*) AS count FROM movies", [], (error, row) => {
     const startMovies = [
       [
         "The Dark Knight",
-        10,
+        4,
         "En av de bästa filmerna någonsin. Joker är ikonisk.",
       ],
-      ["Interstellar", 9, "Stark sci-fi om tid, rymd och relationer."],
-      ["Spirited Away", 8, "Magisk, kreativ och visuellt fantastisk."],
+      ["Interstellar", 5, "Stark sci-fi om tid, rymd och relationer."],
+      ["Spirited Away", 4, "Magisk, kreativ och visuellt fantastisk."],
     ];
 
     const sql =
