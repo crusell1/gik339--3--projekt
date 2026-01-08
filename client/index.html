@@ -1,59 +1,107 @@
 <!DOCTYPE html>
 <html lang="sv">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Min filmdagbok</title>
-</head>
-<body class="bg-slate-100 font-sans p-4 md:p-12">
-
+  </head>
+  <body class="bg-slate-100 font-sans p-4 md:p-12">
     <main class="max-w-6xl mx-auto">
-        <h1 class="text-4xl font-bold text-slate-800 text-center mb-8">Min filmdagbok</h1>
+      <h1 class="text-4xl font-bold text-slate-800 text-center mb-8">
+        Min filmdagbok
+      </h1>
 
-        <section class="bg-white p-6 rounded-lg shadow-md mb-12 max-w-2xl mx-auto">
-            <h2 id="formTitle" class="text-xl font-semibold mb-4 text-slate-700">Lägg till ny film</h2>
-            <form id="movieForm" class="space-y-4">
-
-              <!--input typ=hidden id=movieID, detta är avgörande för att veta om formuläret
+      <section
+        class="bg-white p-6 rounded-lg shadow-md mb-12 max-w-2xl mx-auto"
+      >
+        <h2 id="formTitle" class="text-xl font-semibold mb-4 text-slate-700">
+          Lägg till ny film
+        </h2>
+        <form id="movieForm" class="space-y-4">
+          <!--input typ=hidden id=movieID, detta är avgörande för att veta om formuläret
               ska "skapa" (POST) eller "uppdatera" (PUT)-->
-                <input type="hidden" id="movieId">
+          <input type="hidden" id="movieId" />
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Titel</label>
-                    <input type="text" id="title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2" required>
-                </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Titel</label>
+            <input
+              type="text"
+              id="title"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+              required
+            />
+          </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Betyg (1-5)</label>
-                    <input type="number" id="rating" min="1" max="5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2" required>
-                </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700"
+              >Betyg (1-5)</label
+            >
+            <input
+              type="number"
+              id="rating"
+              min="1"
+              max="5"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+              required
+            />
+          </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Beskrivning</label>
-                    <textarea id="reviewText" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"></textarea>
-                </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700"
+              >Beskrivning</label
+            >
+            <textarea
+              id="reviewText"
+              rows="3"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+            ></textarea>
+          </div>
 
-                <div class="flex gap-2">
-                    <button type="submit" id="submitBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Spara film</button>
-                    <button type="button" id="cancelBtn" class="hidden bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">Avbryt</button>
-                </div>
-            </form>
-        </section>
+          <div class="flex gap-2">
+            <button
+              type="submit"
+              id="submitBtn"
+              class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            >
+              Spara film
+            </button>
+            <button
+              type="button"
+              id="cancelBtn"
+              class="hidden bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
+            >
+              Avbryt
+            </button>
+          </div>
+        </form>
+      </section>
 
-       <!--Denna grid betyder att på mobilen visas 1 kolumn, och på stora skärmar 3 kolumner.--> 
-        <div id="movieList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            </div>
+      <!--Denna grid betyder att på mobilen visas 1 kolumn, och på stora skärmar 3 kolumner.-->
+      <div
+        id="movieList"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      ></div>
     </main>
 
     <!--Modal som kan visa med JS när vi får svar från servern, skall vi ha med detta?-->
-    <div id="feedbackModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-lg max-w-sm w-full shadow-xl text-center">
-            <p id="modalMessage" class="text-lg mb-4"></p>
-            <button onclick="closeModal()" class="bg-slate-800 text-white px-6 py-2 rounded">Okej</button>
-        </div>
+    <div
+      id="feedbackModal"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-white p-6 rounded-lg max-w-sm w-full shadow-xl text-center"
+      >
+        <p id="modalMessage" class="text-lg mb-4"></p>
+        <button
+          onclick="closeModal()"
+          class="bg-slate-800 text-white px-6 py-2 rounded"
+        >
+          Okej
+        </button>
+      </div>
     </div>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
