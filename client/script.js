@@ -1,47 +1,141 @@
-//Uppgift 4 - Skapa variabler, 4 olika DOM-funktioner
+// Konfiguration - ändra porten om din backend körs på en annan (t.ex. 3000)
+const API_URL = "http://localhost:3000/movies";
 
-const checkbox = document.querySelector("#divStyle"); //querySelector
+// Hämta element från HTML
+const movieForm = document.getElementById("movieForm");
+const movieList = document.getElementById("movieList");
+const movieIdInput = document.getElementById("movieId");
+const submitBtn = document.getElementById("submitBtn");
+const feedbackModal = document.getElementById("feedbackModal");
+const modalMessage = document.getElementById("modalMessage");
 
-const textfields = document.getElementsByClassName("textfield"); //getElementsByClassName
-
-const button = document.getElementById("button"); //getElementById
-
-const divelement = document.getElementsByTagName("div")[1]; //getElementsByTagName
-
-//Uppgift 5 - Skapa en fördefinierad funktion
-
-function input(e) {
-  //Skriver ut vilket fält som triggat eventet t.ex. "content" eller "color"
-  console.log("Target:", e.target);
-
-  //Skapa variabel fieldName och sparar target.name
-  const fieldName = e.target.name;
-  console.log("Field name:", fieldName);
-
-  //Om fältet är 'content'
-  if (fieldName === "content") {
-    //Skriv ut värdet i div-elementet
-    divelement.innerHTML = e.target.value;
+// 1. VISA ALLA - Körs när sidan laddas
+async function fetchMovies() {
+  try {
+    const response = await fetch(API_URL);
+    const movies = await response.json();
+    renderMovies(movies);
+  } catch (error) {
+    showFeedback("Kunde inte hämta filmer: " + error.message);
   }
 }
 
-//Uppgift 6 - Koppla eventlyssnare
+// Funktion för att skapa HTML-elementen (boxarna) dynamiskt
+function renderMovies(movies) {
+  movieList.innerHTML = ""; // Töm listan först
 
-//när värdet i checkboxen ändras så triggas eventet change och funktionen körs.
-checkbox.addEventListener("change", function () {
-  //skapar colorvalue när färgboxen får ett value t.ex. "red"
-  const colorValue = textfields[0].value;
+  movies.forEach((movie) => {
+    const movieCard = document.createElement("div");
 
-  //hämtar div och använder .style för att ändra bakrundsfärgen i CSS till den färgen som skrevs i colorValue
-  divelement.style.backgroundColor = colorValue;
-});
+    // Tailwind-styling för boxen
 
-//Loopar igenom textfälten och lyssnar på varje input som skrivs in
-for (let i = 0; i < textfields.length; i++) {
-  textfields[i].addEventListener("input", input);
+    let ratingClass = "border-slate-200 bg-white";
+
+    if (movie.rating === 5) ratingClass = "border-green-400 bg-green-50";
+    else if (movie.rating === 4) ratingClass = "border-yellow-400 bg-yellow-50";
+    else if (movie.rating === 3) ratingClass = "border-orange-400 bg-orange-50";
+    else if (movie.rating === 2) ratingClass = "border-red-400 bg-red-50";
+    else if (movie.rating === 1) ratingClass = "border-rose-500 bg-rose-50";
+
+    movieCard.className = `p-5 rounded-xl shadow-sm border-2 transition hover:shadow-md ${ratingClass}`;
+
+    movieCard.innerHTML = `
+            <h3 class="text-xl font-bold text-slate-800 mb-1">${movie.title}</h3>
+            <p class="text-sm font-semibold text-slate-500 mb-3 italic">Betyg: ${movie.rating}/5</p>
+            <p class="text-slate-600 mb-6">${movie.reviewText}</p>
+            <div class="flex gap-3">
+                <button onclick="prepareUpdate(${movie.id})" class="text-sm bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-200 transition">Ändra</button>
+                <button onclick="deleteMovie(${movie.id})" class="text-sm bg-red-100 text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-200 transition">Ta bort</button>
+            </div>
+        `;
+    movieList.appendChild(movieCard);
+  });
 }
 
-//eventlyssnare osm tar bort diven vid "click"
-button.addEventListener("click", function () {
-  divelement.remove();
+// 2. SKICKA FORMULÄR
+movieForm.addEventListener("submit", async (e) => {
+  e.preventDefault(); // Hindra sidan från att laddas om
+
+  const movieData = {
+    title: document.getElementById("title").value,
+    rating: parseInt(document.getElementById("rating").value),
+    reviewText: document.getElementById("reviewText").value,
+  };
+
+  const id = movieIdInput.value;
+  let method = "POST"; // Standard är att skapa ny
+  let url = API_URL;
+
+  // Om det finns ett ID i det dolda fältet, välj PUT (uppdatera)
+  if (id) {
+    method = "PUT";
+    url = `${API_URL}/${id}`; //Lägg till ID i URL:en för PUT
+    movieData.id = id;
+  }
+
+  try {
+    const response = await fetch(url, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(movieData),
+    });
+
+    if (response.ok) {
+      showFeedback(id ? "Filmen har uppdaterats!" : "Filmen har lagts till!");
+      movieForm.reset();
+      movieIdInput.value = ""; // Rensa ID efteråt
+      submitBtn.textContent = "Spara film";
+      fetchMovies(); // Uppdatera listan dynamiskt
+    }
+  } catch (error) {
+    showFeedback("Ett fel uppstod: " + error.message);
+  }
 });
+
+// 3. TA BORT EN RESURS
+async function deleteMovie(id) {
+  if (confirm("Är du säker på att du vill ta bort filmen?")) {
+    try {
+      const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+
+      if (response.ok) {
+        showFeedback("Filmen har tagits bort.");
+        fetchMovies(); // Uppdatera listan dynamiskt
+      }
+    } catch (error) {
+      showFeedback("Kunde inte ta bort: " + error.message);
+    }
+  }
+}
+
+// 4. FÖRBERED UPPDATERING (Fyll i formuläret)
+async function prepareUpdate(id) {
+  try {
+    const response = await fetch(`${API_URL}/${id}`);
+    const movie = await response.json();
+
+    // Fyll formuläret med befintlig data
+    document.getElementById("title").value = movie.title;
+    document.getElementById("rating").value = movie.rating;
+    document.getElementById("reviewText").value = movie.reviewText;
+    movieIdInput.value = movie.id; // Spara ID osynligt
+
+    submitBtn.textContent = "Uppdatera film";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (error) {
+    console.error("Kunde inte hämta film för redigering");
+  }
+}
+
+// 5. MEDDELANDERUTA (Feedback)
+function showFeedback(message) {
+  modalMessage.textContent = message;
+  feedbackModal.classList.remove("hidden"); // Visa modaler genom att ta bort Tailwind-klass
+}
+
+function closeModal() {
+  feedbackModal.classList.add("hidden");
+}
+
+// Starta appen
+fetchMovies();
