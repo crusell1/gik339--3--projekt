@@ -28,7 +28,7 @@ function renderMovies(movies) {
     const movieCard = document.createElement("div");
 
     // Tailwind-styling för boxen
-    // KRAV: En egenskap styr designen (t.ex. gult för högt betyg)
+
     let ratingClass = "border-slate-200 bg-white";
 
     if (movie.rating === 5) ratingClass = "border-green-400 bg-green-50";

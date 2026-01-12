@@ -13,40 +13,47 @@ const sqlite3 = require("sqlite3").verbose();
 
 const db = new sqlite3.Database("./movies.db");
 
-db.run(`
-  CREATE TABLE IF NOT EXISTS movies (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    rating INTEGER NOT NULL,
-    reviewText TEXT NOT NULL
-  )
-`);
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS movies (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      rating INTEGER NOT NULL,
+      reviewText TEXT NOT NULL
+    )
+  `);
 
-db.get("SELECT COUNT(*) AS count FROM movies", [], (error, row) => {
-  if (error) {
-    console.log("Fel vid kontroll av databasen:", error.message);
-    return;
-  }
+  db.get("SELECT COUNT(*) AS count FROM movies", (error, row) => {
+    if (error) {
+      console.log("Fel vid kontroll av databasen:", error.message);
+      return;
+    }
 
-  // Om tabellen är tom – lägg in startfilmer
-  if (row.count === 0) {
-    const startMovies = [
-      [
-        "The Dark Knight",
-        4,
-        "En av de bästa filmerna någonsin. Joker är ikonisk.",
-      ],
-      ["Interstellar", 5, "Stark sci-fi om tid, rymd och relationer."],
-      ["Spirited Away", 4, "Magisk, kreativ och visuellt fantastisk."],
-    ];
+    if (row.count === 0) {
+      const startMovies = [
+        [
+          "The Dark Knight",
+          5,
+          "En av de bästa filmerna någonsin. Joker är ikonisk.",
+        ],
+        ["Interstellar", 4, "Stark sci-fi om tid, rymd och relationer."],
+        ["Spirited Away", 3, "Magisk, kreativ och visuellt fantastisk."],
+      ];
 
-    const sql =
-      "INSERT INTO movies (title, rating, reviewText) VALUES (?, ?, ?)";
+      const sql =
+        "INSERT INTO movies (title, rating, reviewText) VALUES (?, ?, ?)";
 
-    startMovies.forEach((movie) => {
-      db.run(sql, movie);
-    });
-  }
+      startMovies.forEach((movie) => {
+        db.run(sql, movie, (err) => {
+          if (err) console.log("Fel vid INSERT:", err.message);
+        });
+      });
+
+      console.log("Startfilmer inlagda.");
+    } else {
+      console.log("Filmer finns redan:", row.count);
+    }
+  });
 });
 
 server.get("/movies", (req, res) => {
@@ -57,7 +64,7 @@ server.get("/movies", (req, res) => {
         .json({ message: "Serverfel vid hämtning av filmer" });
     }
 
-    res.status(200).json(rows); //returnerar listan
+    res.status(200).json(rows);
   });
 });
 
@@ -116,12 +123,12 @@ server.put("/movies/:id", (req, res) => {
           .json({ message: "Serverfel vid uppdatering av film" });
       }
 
-      // Om inget uppdaterades => id fanns inte
+      //Om inget uppdaterades > id fanns inte
       if (this.changes === 0) {
         return res.sendStatus(404);
       }
 
-      // Hämta uppdaterad rad och skicka tillbaka
+      //Hämta uppdaterad rad och skicka tillbaka
       db.get("SELECT * FROM movies WHERE id = ?", [id], (error2, row) => {
         if (error2) {
           return res
